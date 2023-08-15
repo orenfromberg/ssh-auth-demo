@@ -1,0 +1,34 @@
+version: '3'
+services:
+  server:
+    container_name: ssh-server
+    hostname: server.mydomain.local
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    volumes:
+      - ./server/.ssh:/home/sshuser/.ssh
+      - ./server/ssh/id_ed25519:/etc/ssh/id_ed25519
+      - ./server/ssh/id_ed25519.pub:/etc/ssh/id_ed25519.pub
+      - ./server/ssh/id_ed25519-cert.pub:/etc/ssh/id_ed25519-cert.pub
+      - ./server/ssh/ca.pub:/etc/ssh/ca.pub
+    networks:
+      my-network:
+        aliases:
+          - server.mydomain.local
+
+  client:
+    container_name: ssh-client
+    hostname: laptop.mydomain.local
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    volumes:
+      - ./client:/home/sshuser/.ssh
+    networks:
+      my-network:
+        aliases:
+          - laptop.mydomain.local
+
+networks:
+  my-network:
