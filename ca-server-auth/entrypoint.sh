@@ -2,7 +2,7 @@
 
 # delete all the old keys
 # rm /etc/ssh/ssh_host_*
-# # create new keys
+# create new keys
 # ssh-keygen -A
 
 # start the ssh server

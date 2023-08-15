@@ -1,4 +1,4 @@
-# ssh-ca-demo
+# ssh-auth-demo
 
 ## password-auth
 
@@ -74,6 +74,27 @@ ED25519 key fingerprint is SHA256:51CVwSt2MsAXU0jICkSXy/IVgdOlJ316on3Y6xj1mAg.
 This key is not known by any other names.
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
 Warning: Permanently added 'server' (ED25519) to the list of known hosts.
+Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+sshuser@server:~$ 
+```
+
+## ca-server-auth
+
+```
+./init.sh
+docker compose up -d --build
+docker compose run client
+```
+
+```
+sshuser@laptop:/$ ssh server.mydomain.local
 Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
 
 The programs included with the Debian GNU/Linux system are free software;
