@@ -3,13 +3,13 @@
 ## password-auth
 
 First start the server and client:
-```shell-script
+```
 docker compose up -d --build
 docker compose run client
 ```
 
 Now ssh into the server from the client:
-```shell-script
+```
 root@laptop:/# ssh sshuser@server.mydomain.local
 The authenticity of host 'server.mydomain.local (192.168.96.3)' can't be established.
 ED25519 key fingerprint is SHA256:0No60RgzYcHmcq6XQzJtxeJJpQ5aQqvUikNyd3Gsi/0.
@@ -30,7 +30,7 @@ sshuser@server:~$
 
 log out of the server:
 
-```shell-script
+```
 sshuser@server:~$ exit
 logout
 Connection to server.mydomain.local closed.
