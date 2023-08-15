@@ -1,5 +1,13 @@
 # ssh-auth-demo
 
+This repo contains an exploration of various SSH authentication schemes that include:
+* password authentication
+* ssh key authentication
+* CA host certificate authentication
+* CA host/client certificate authentication
+
+Heavily based on this blog post: https://jameshfisher.com/2018/03/16/how-to-create-an-ssh-certificate-authority/
+
 ## password-auth
 
 First start the server and client:
