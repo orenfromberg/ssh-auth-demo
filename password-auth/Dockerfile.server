@@ -1,13 +1,15 @@
-# Use the official Debian image as the base
 FROM debian:stable
 
 # Install SSH server
-RUN apt-get update && apt-get install -y openssh-server
+RUN apt-get update
+RUN apt-get install -y openssh-server
 
-# Create a user for SSH access (change these values as needed)
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# Create a user for SSH access
 RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 RUN echo 'sshuser:password' | chpasswd
 RUN mkdir -p /var/run/sshd
 
-# Start SSH server
-CMD ["/usr/sbin/sshd", "-D"]
+ENTRYPOINT ["/entrypoint.sh"]
