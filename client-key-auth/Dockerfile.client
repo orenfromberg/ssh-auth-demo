@@ -1,0 +1,11 @@
+FROM debian:stable
+
+# Install SSH server
+RUN apt-get update 
+RUN apt-get install -y openssh-client
+
+# Create a user for SSH access
+RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
+RUN echo 'sshuser:password' | chpasswd
+
+USER sshuser
