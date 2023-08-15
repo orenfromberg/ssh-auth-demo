@@ -12,7 +12,7 @@ RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 RUN echo 'sshuser:password' | chpasswd
 RUN mkdir -p /var/run/sshd
 
-RUN echo "HostCertificate /etc/ssh/id_ed25519-cert.pub" | tee -a /etc/ssh/sshd_config
-RUN echo "HostKey /etc/ssh/id_ed25519" | tee -a /etc/ssh/sshd_config
+RUN echo "HostCertificate /etc/ssh/id_ed25519-cert.pub" >> /etc/ssh/sshd_config
+RUN echo "HostKey /etc/ssh/id_ed25519" >> /etc/ssh/sshd_config
 RUN echo "TrustedUserCAKeys /etc/ssh/ca.pub" >> /etc/ssh/sshd_config
 ENTRYPOINT ["/entrypoint.sh"]
