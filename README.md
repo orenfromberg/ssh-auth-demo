@@ -9,7 +9,7 @@ This repo contains an exploration of various SSH authentication schemes that inc
 
 Heavily based on this blog post: https://jameshfisher.com/2018/03/16/how-to-create-an-ssh-certificate-authority/
 
-## password-auth
+## 1-password-auth
 
 First start the server and client:
 ```
@@ -51,7 +51,7 @@ tear everything down:
 docker compose down
 ```
 
-## key-client-auth
+## 2-key-client-auth
 
 Now we will level up to using SSH keys to authenticate a client to a server.
 
@@ -104,7 +104,7 @@ clean up:
 2. exit the client
 3. run `docker compose down`
 
-## key-server-auth
+## 3-key-server-auth
 
 We'll build on key-client-auth to authenticate the server to the client.
 
