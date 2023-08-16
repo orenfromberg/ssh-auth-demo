@@ -6,7 +6,10 @@ RUN apt-get install -y openssh-server
 
 # Create a user for SSH access
 RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
-RUN echo 'sshuser:password' | chpasswd
-RUN mkdir -p /var/run/sshd
 
+# change the user password to "password"
+RUN echo 'sshuser:password' | chpasswd
+
+# this is needed to run sshd
+RUN mkdir -p /var/run/sshd
 CMD ["/usr/sbin/sshd", "-D"]

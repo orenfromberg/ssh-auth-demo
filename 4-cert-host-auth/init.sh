@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+docker compose down
+
 rm -rf ca client server
 mkdir -p ca client server
 
@@ -7,7 +9,7 @@ mkdir -p ca client server
 ssh-keygen -t rsa -N '' -C 'ca@mydomain.local' -f ca/id_rsa
 
 # create client ssh key
-ssh-keygen -t ed25519 -N '' -C sshuser@laptop.mydomain.local -f client/id_ed25519
+ssh-keygen -t ed25519 -N 'keypass' -C sshuser@laptop.mydomain.local -f client/id_ed25519
 
 # create server key pair
 ssh-keygen -t ed25519 -N '' -C root@server.mydomain.local -f server/id_ed25519
@@ -22,3 +24,5 @@ ssh-keygen -s ca/id_rsa -h -I server.mydomain.local -n server.mydomain.local ser
 cat <<EOF > client/known_hosts
 @cert-authority *.mydomain.local $(cat ca/id_rsa.pub)
 EOF
+
+docker compose up -d --build

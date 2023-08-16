@@ -10,9 +10,13 @@ RUN echo "HostKey /etc/ssh/id_ed25519" >> /etc/ssh/sshd_config
 
 # Create a user for SSH access
 RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
-RUN echo 'sshuser:password' | chpasswd
-RUN mkdir -p /var/run/sshd
 
+# we don't need the password anymore
+# RUN echo 'sshuser:password' | chpasswd
+
+# but we do need the clients public key
 COPY --chown=sshuser:sshuser server/authorized_keys /home/sshuser/.ssh/authorized_keys
 
+# this is needed to run sshd
+RUN mkdir -p /var/run/sshd
 CMD ["/usr/sbin/sshd", "-D"]

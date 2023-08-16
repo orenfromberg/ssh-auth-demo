@@ -9,24 +9,52 @@ This repo contains an exploration of various SSH authentication schemes that inc
 
 Heavily based on this blog post: https://jameshfisher.com/2018/03/16/how-to-create-an-ssh-certificate-authority/
 
+You will need docker and docker-compose to run these examples.
+
 ## 1-password-auth
 
-Not much to do here except know the users password on the server.
+Password authentication is the most basic form of ssh authentication.
 
-First start the server and client:
+A user must enter a password every time they ssh to a remote host.
+
+Run the following commands in your terminal:
+
 ```
-docker compose up -d --build
+cd 1-password-auth
+./init.sh
 docker compose run client
 ```
-Now ssh into the server from the client using the password `password`:
+
+You will see the host shell prompt:
 ```
-root@laptop:/# ssh sshuser@server
-The authenticity of host 'server (172.29.0.3)' can't be established.
-ED25519 key fingerprint is SHA256:0TWqTu3soSCfGbmIqhhHzp811iMaSNkPdgENCvWjKKU.
+sshuser@laptop:/$ 
+```
+
+Enter `ssh server.mydomain.local` in the prompt and you should see something like the following:
+```
+The authenticity of host 'server.mydomain.local (192.168.224.3)' can't be established.
+ED25519 key fingerprint is SHA256:PzhrcmX8/01Bnw8ulG/n05FTu92G32eJrZ8NrDyTAh4.
 This key is not known by any other names.
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added 'server' (ED25519) to the list of known hosts.
-sshuser@server's password: 
+Are you sure you want to continue connecting (yes/no/[fingerprint])? 
+```
+
+The ssh client found a host named `server.mydomain.local` at ip `192.168.224.3` but it has no way to verify that it is who it says it is. Any server on the network could pretend to be the host named `server.mydomain.local`. This kind of attack is called a man in the middle (MitM) attack. Is this the real one?
+
+The server provided a hint in the form of an ssh key fingerprint. This is derived from the private key used by the ssh server and is used to verify the authenticity and integrity of the server. If it looks familiar then it is safe to trust the host.
+
+The client prompts the user to choose whether it wants to trust that it is connecting to the real server. If we say no then the client will accept that the host key verification was a failure and exit. 
+
+If we say yes and verify the authenticity of the server then we get a new prompt:
+
+```
+Warning: Permanently added 'server.mydomain.local' (ED25519) to the list of known hosts.
+sshuser@server.mydomain.local's password:
+```
+
+The client added the public key of the server to a file called `known_hosts`. When the client connects to a server, it checks to see if it has seen it before by looking up the mapping between the name and the public key.
+
+Enter the password `password` and you should see the server banner and shell prompt:
+```
 Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
 
 The programs included with the Debian GNU/Linux system are free software;
@@ -35,23 +63,45 @@ individual files in /usr/share/doc/*/copyright.
 
 Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
-sshuser@server:~$ 
+Last login: Wed Aug 16 12:08:23 2023 from 192.168.224.2
+sshuser@server:~$
 ```
-log out of the server:
+Exit the server with `exit` to go back to the client:
+
 ```
 sshuser@server:~$ exit
 logout
 Connection to server.mydomain.local closed.
+sshuser@laptop:/$ 
 ```
-log out of the client:
+
+Connect again to the same server with `ssh server.mydomain.local` and we are only prompted for a password.
+
 ```
-root@laptop:/# exit
-exit
+sshuser@laptop:/$ ssh server.mydomain.local
+sshuser@server.mydomain.local's password: 
 ```
-tear everything down:
+
+We do not get prompted to trust the host because ssh recognized the server in the `known_hosts` file.
+
+Enter your password and you get the server banner message and shell prompt:
+
 ```
-docker compose down
+Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+Last login: Wed Aug 16 12:12:32 2023 from 192.168.224.2
+sshuser@server:~$ 
 ```
+
+enter `exit` to go back to the client, and `exit` again to go back to your local host.
+
+Run `docker compose down` to bring down the docker containers and network.
 
 ## 2-key-client-auth
 
