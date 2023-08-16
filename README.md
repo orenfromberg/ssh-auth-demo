@@ -11,6 +11,8 @@ Heavily based on this blog post: https://jameshfisher.com/2018/03/16/how-to-crea
 
 ## 1-password-auth
 
+Not much to do here except know the users password on the server.
+
 First start the server and client:
 ```
 docker compose up -d --build
@@ -54,6 +56,10 @@ docker compose down
 ## 2-key-client-auth
 
 Now we will level up to using SSH keys to authenticate a client to a server.
+
+We will create a client ssh key pair and then copy the public key to the server.
+
+the public key will get copied to the `authorized_keys` file.
 
 Run the initialization script to create the client key:
 
@@ -148,6 +154,10 @@ smoothest login yet with no password and no prompting the user whether they want
 
 ## 4-cert-host-auth
 
+Now we will continue to add the clients public key to the servers `authorized_keys` file, but instead of adding the server's public key to the clients `known_hosts` file, we'll add the CA's public key to the `known_hosts` file.
+Additionally, we'll create a host certificate and then copy it to the server and configure the server to serve it to the client to prove its authenticity.
+The client will recieve the host certificate and know that the server is legit.
+
 ```
 ./init.sh
 docker compose up -d --build
@@ -175,6 +185,8 @@ sshuser@server:~$
 ```
 
 ## 5-cert-host-client-auth
+
+Finally, we'll continue to use the host certificate to prove the server is authentic but we will no longer add individual client public keys to the servers `authorized_keys` file. Now we will configure the server to use the CA public key to verify clients, and add the client certificate to the client to present to the server.
 
 ```
 ./init.sh
