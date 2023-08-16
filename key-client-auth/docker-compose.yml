@@ -6,8 +6,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.server
-    volumes:
-      - ./server:/home/sshuser/.ssh
     networks:
       my-network:
         aliases:
@@ -19,8 +17,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.client
-    volumes:
-      - ./client:/home/sshuser/.ssh
     networks:
       my-network:
         aliases:

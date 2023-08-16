@@ -11,4 +11,7 @@ RUN echo 'sshuser:password' | chpasswd
 
 USER sshuser
 
+COPY --chown=sshuser:sshuser --chmod=600 client/id_ed25519 /home/sshuser/.ssh/id_ed25519
+COPY --chown=sshuser:sshuser --chmod=644 client/id_ed25519.pub /home/sshuser/.ssh/id_ed25519.pub
+
 ENTRYPOINT ["/entrypoint.sh"]

@@ -50,7 +50,7 @@ tear everything down:
 docker compose down
 ```
 
-## client-key-auth
+## key-client-auth
 
 run the initialization script to create the client key:
 
@@ -101,9 +101,10 @@ clean up:
 2. exit the client
 3. run `docker compose down`
 
-## server-key-auth
+## key-server-auth
 
-We'll build on client-key-auth and add the servers public key to the clients `known_hosts` file.
+We'll build on key-client-auth and add the servers public key to the clients `known_hosts` file.
+
 
 ## ca-server-auth
 
