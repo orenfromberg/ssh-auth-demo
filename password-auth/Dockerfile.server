@@ -4,9 +4,6 @@ FROM debian:stable
 RUN apt-get update
 RUN apt-get install -y openssh-server
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Create a user for SSH access
 RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 RUN echo 'sshuser:password' | chpasswd
