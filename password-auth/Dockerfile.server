@@ -12,4 +12,4 @@ RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 RUN echo 'sshuser:password' | chpasswd
 RUN mkdir -p /var/run/sshd
 
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["/usr/sbin/sshd", "-D"]

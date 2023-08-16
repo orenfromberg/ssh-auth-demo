@@ -65,23 +65,26 @@ docker compose up -d --build
 docker compose run client
 ```
 
-Start the ssh-agent and load the key:
-
+After getting a shell in the client you should see the following:
 ```
-sshuser@laptop:/$ eval $(ssh-agent) && ssh-add
-Agent pid 9
+Agent pid 8
 Identity added: /home/sshuser/.ssh/id_ed25519 (sshuser@laptop.mydomain.local)
+sshuser@laptop:/$
 ```
 
-Finally, ssh into the server using `ssh server`:
+This is the output from the entrypoint script doing two things:
+1. starting the ssh agent
+2. adding the private key as an identity
+
+Now ssh into the server using `ssh server.mydomain.local`:
 
 ```
-sshuser@laptop:/$ ssh server
-The authenticity of host 'server (172.27.0.3)' can't be established.
-ED25519 key fingerprint is SHA256:51CVwSt2MsAXU0jICkSXy/IVgdOlJ316on3Y6xj1mAg.
+sshuser@laptop:/$ ssh server.mydomain.local
+The authenticity of host 'server.mydomain.local (172.31.0.3)' can't be established.
+ED25519 key fingerprint is SHA256:PzhrcmX8/01Bnw8ulG/n05FTu92G32eJrZ8NrDyTAh4.
 This key is not known by any other names.
 Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added 'server' (ED25519) to the list of known hosts.
+Warning: Permanently added 'server.mydomain.local' (ED25519) to the list of known hosts.
 Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
 
 The programs included with the Debian GNU/Linux system are free software;
@@ -92,6 +95,15 @@ Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
 sshuser@server:~$ 
 ```
+
+clean up:
+1. exit the server
+2. exit the client
+3. run `docker compose down`
+
+## server-key-auth
+
+We'll build on client-key-auth and add the servers public key to the clients `known_hosts` file.
 
 ## ca-server-auth
 
