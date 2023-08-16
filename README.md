@@ -2,7 +2,8 @@
 
 This repo contains an exploration of various SSH authentication schemes that include:
 * password authentication
-* ssh key authentication
+* ssh client key authentication
+* ssh client/server key authentication
 * CA host certificate authentication
 * CA host/client certificate authentication
 
@@ -52,7 +53,9 @@ docker compose down
 
 ## key-client-auth
 
-run the initialization script to create the client key:
+Now we will level up to using SSH keys to authenticate a client to a server.
+
+Run the initialization script to create the client key:
 
 ```
 ./init.sh
