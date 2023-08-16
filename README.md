@@ -103,8 +103,45 @@ clean up:
 
 ## key-server-auth
 
-We'll build on key-client-auth and add the servers public key to the clients `known_hosts` file.
+We'll build on key-client-auth to authenticate the server to the client.
 
+To authenticate the server to the client, we need to add the servers public key to the clients `known_hosts` file.
+
+We are doing it in the entryscript because the format of the `known_hosts` file makes it difficult to add the public key manually.
+
+We'll use `ssh-keyscan` which will output the format we need.
+
+1. ./init.sh
+2. docker compose up -d --build
+3. docker compose run client
+
+```
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+Agent pid 9
+Identity added: /home/sshuser/.ssh/id_ed25519 (sshuser@laptop.mydomain.local)
+sshuser@laptop:/$
+```
+
+now ssh to the server:
+
+```
+sshuser@laptop:/$ ssh server.mydomain.local
+Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+sshuser@server:~$
+```
+
+smoothest login yet with no password and no prompting the user whether they want to trust the server.
 
 ## ca-server-auth
 
