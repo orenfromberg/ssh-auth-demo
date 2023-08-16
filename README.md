@@ -173,6 +173,36 @@ Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
 permitted by applicable law.
 sshuser@server:~$ 
 ```
+
+## 5-cert-host-client-auth
+
+```
+./init.sh
+docker compose up -d --build
+docker compose run client
+```
+You'll see the agent loading the identity and the certificate:
+```
+Agent pid 8
+Identity added: /home/sshuser/.ssh/id_ed25519 (sshuser@laptop.mydomain.local)
+Certificate added: /home/sshuser/.ssh/id_ed25519-cert.pub (laptop.mydomain.local)
+sshuser@laptop:/$
+```
+
+Now ssh to the server:
+```
+sshuser@laptop:/$ ssh server.mydomain.local
+Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+sshuser@server:~$ 
+```
+
 ## ca-server-auth
 
 ```
