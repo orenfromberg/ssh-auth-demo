@@ -104,7 +104,7 @@ clean up:
 2. exit the client
 3. run `docker compose down`
 
-## 3-key-server-auth
+## 3-key-client-server-auth
 
 We'll build on key-client-auth to authenticate the server to the client.
 
