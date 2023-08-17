@@ -11,13 +11,13 @@ Heavily based on this blog post: https://jameshfisher.com/2018/03/16/how-to-crea
 
 You will need docker and docker-compose to run these examples.
 
-## 1-password-auth
+## Password Authentication
 
 Password authentication is the most basic form of ssh authentication.
 
-A user must enter a password every time they ssh to a remote host.
+In this scheme a user must enter a password every time they ssh to a remote host.
 
-Run the following commands in your terminal:
+To walk through this example, enter the following commands in your terminal:
 
 ```
 cd 1-password-auth
@@ -29,6 +29,8 @@ You will see the host shell prompt:
 ```
 sshuser@laptop:/$ 
 ```
+
+To ssh to the server, we don't need to give any other information other than the server name. This is because ssh will assume the current username and port 22 by default.
 
 Enter `ssh server.mydomain.local` in the prompt and you should see something like the following:
 ```
@@ -103,13 +105,15 @@ enter `exit` to go back to the client, and `exit` again to go back to your local
 
 Run `docker compose down` to bring down the docker containers and network.
 
-## 2-key-client-auth
+## SSH Client Key Authentication
 
-Now we will level up to using SSH keys to authenticate a client to a server.
+The next step is to disable password authentication on the server and using a client SSH key for authenticationinstead.
 
-We will create a client ssh key pair and then copy the public key to the server.
+On the client we create an ssh key pair that consist of private and public keys.
 
-the public key will get copied to the `authorized_keys` file.
+ and then copy the public key to the server.
+
+On the server side, the client public key will get copied to the `authorized_keys` file.
 
 Run the initialization script to create the client key:
 
