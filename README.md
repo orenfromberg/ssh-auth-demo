@@ -107,7 +107,11 @@ Run `docker compose down` to bring down the docker containers and network.
 
 ## SSH Client Key Authentication
 
-The next step is to disable password authentication on the server and using a client SSH key for authenticationinstead.
+The next step is to disable password authentication on the server and using a client SSH key for authentication instead.
+
+To disable password authentication, add the following line to the server ssh configuration file `/etc/ssh/sshd_config`:
+
+    PasswordAuthentication no
 
 On the client we create an ssh key pair that consist of private and public keys.
 

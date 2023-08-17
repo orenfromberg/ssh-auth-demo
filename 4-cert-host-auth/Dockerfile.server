@@ -4,6 +4,7 @@ FROM debian:stable
 RUN apt-get update
 RUN apt-get install -y openssh-server
 
+# configure the private key for the server
 COPY server/id_ed25519 /etc/ssh/id_ed25519
 # COPY server/id_ed25519.pub /etc/ssh/id_ed25519.pub
 COPY server/id_ed25519-cert.pub /etc/ssh/id_ed25519-cert.pub
@@ -13,8 +14,7 @@ RUN echo "HostKey /etc/ssh/id_ed25519" >> /etc/ssh/sshd_config
 # Create a user for SSH access
 RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 
-# we don't need the password anymore so disable password auth
-# RUN echo 'sshuser:password' | chpasswd
+# disable password auth
 RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
 # but we do need the clients public key
