@@ -1,0 +1,14 @@
+FROM debian:stable
+
+RUN apt-get update 
+RUN apt-get install -y openssh-client
+
+RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
+
+USER sshuser
+
+# create this directory manually for now 
+RUN mkdir -p ~/.ssh && chmod 700 ~/.ssh && chown sshuser:sshuser ~/.ssh
+
+COPY --chown=sshuser:sshuser --chmod=700 entrypoint.sh entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

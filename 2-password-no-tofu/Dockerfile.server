@@ -7,8 +7,8 @@ RUN apt-get install -y openssh-server
 # Create a user for SSH access
 RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 
-# disable password auth
-RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
+# change the user password to "password"
+RUN echo 'sshuser:password' | chpasswd
 
 # this is needed to run sshd
 RUN mkdir -p /var/run/sshd

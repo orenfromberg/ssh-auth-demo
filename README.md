@@ -11,7 +11,7 @@ Heavily based on this blog post: https://jameshfisher.com/2018/03/16/how-to-crea
 
 You will need docker and docker-compose to run these examples.
 
-## Password Authentication
+## 1-password-auth
 
 Password authentication is the most basic form of ssh authentication.
 
@@ -40,11 +40,13 @@ This key is not known by any other names.
 Are you sure you want to continue connecting (yes/no/[fingerprint])? 
 ```
 
-The ssh client found a host named `server.mydomain.local` at ip `192.168.224.3` but it has no way to verify that it is who it says it is. Any server on the network could pretend to be the host named `server.mydomain.local`. This kind of attack is called a man in the middle (MitM) attack. Is this the real one?
+The ssh client found a host named `server.mydomain.local` at ip `192.168.224.3` but it has no way to verify that it is who it says it is. Any server on the network could pretend to be the host named `server.mydomain.local`. This kind of attack is called a man in the middle (MitM) attack. Is this the real server that we are connecting to?
 
-The server provided a hint in the form of an ssh key fingerprint. This is derived from the private key used by the ssh server and is used to verify the authenticity and integrity of the server. If it looks familiar then it is safe to trust the host.
+The server provided a hint in the form of an ssh key fingerprint. This unique identifier is derived from the public key used by the ssh serverand is used to verify the identity of the server. If it looks familiar then it is safe to trust the host.
 
-The client prompts the user to choose whether it wants to trust that it is connecting to the real server. If we say no then the client will accept that the host key verification was a failure and exit. 
+In practice one should verify the identity of the server using a trusted third party, like from a system administrator or a website that publishes the public key fingerprint. For example, GitHub publishes the fingerprints [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/githubs-ssh-key-fingerprints).
+
+The ssh client prompts the user to choose whether they want to trust that it is connecting to the real server. This authentication scheme is called Trust On First Use (TOFU). If we say no then the client will accept that the host key verification was a failure and exit. 
 
 If we say yes and verify the authenticity of the server then we get a new prompt:
 
@@ -105,7 +107,11 @@ enter `exit` to go back to the client, and `exit` again to go back to your local
 
 Run `docker compose down` to bring down the docker containers and network.
 
-## SSH Client Key Authentication
+## 2-password-no-tofu
+
+This example is identical to the first except we use ssh-keyscan ahead of time to add the server to our known hosts so that it is already trusted before we connect to it.
+
+## 3-key-auth
 
 The next step is to disable password authentication on the server and using a client SSH key for authentication instead.
 

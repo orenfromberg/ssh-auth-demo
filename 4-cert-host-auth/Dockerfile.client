@@ -3,12 +3,11 @@ FROM debian:stable
 RUN apt-get update 
 RUN apt-get install -y openssh-client
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 
 USER sshuser
+
+COPY --chown=sshuser:sshuser --chmod=700 entrypoint.sh entrypoint.sh
 
 # copy the private key to the client
 COPY --chown=sshuser:sshuser --chmod=600 client/id_ed25519 /home/sshuser/.ssh/id_ed25519
