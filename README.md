@@ -111,6 +111,32 @@ Run `docker compose down` to bring down the docker containers and network.
 
 This example is identical to the first except we use ssh-keyscan ahead of time to add the server to our known hosts so that it is already trusted before we connect to it.
 
+./init.sh
+
+now do the following in the console:
+
+```
+sshuser@laptop:~$ mkdir -p ~/.ssh && chmod 700 ~/.ssh
+sshuser@laptop:~$ ssh-keyscan server.mydomain.local > ~/.ssh/known_hosts
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+sshuser@laptop:~$ ssh server.mydomain.local
+sshuser@server.mydomain.local's password: 
+Linux server.mydomain.local 5.15.0-79-generic #86-Ubuntu SMP Mon Jul 10 16:07:21 UTC 2023 x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+sshuser@server:~$ 
+```
+
+
 ## 3-key-auth
 
 The next step is to disable password authentication on the server and using a client SSH key for authentication instead.
@@ -121,7 +147,7 @@ To disable password authentication, add the following line to the server ssh con
 
 On the client we create an ssh key pair that consist of private and public keys.
 
- and then copy the public key to the server.
+The public key is then copied to the server.
 
 On the server side, the client public key will get copied to the `authorized_keys` file.
 
@@ -140,24 +166,27 @@ docker compose run client
 
 After getting a shell in the client you should see the following:
 ```
-Agent pid 8
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
+Agent pid 9
+Enter passphrase for /home/sshuser/.ssh/id_ed25519:
+```
+The output is from scanning the server for the public keys and starting the ssh agent. Now we need to enter the passphrase for the private key `keypass`:
+
+``` 
 Identity added: /home/sshuser/.ssh/id_ed25519 (sshuser@laptop.mydomain.local)
 sshuser@laptop:/$
 ```
 
-This is the output from the entrypoint script doing two things:
-1. starting the ssh agent
-2. adding the private key as an identity
+Once the private key is unlocked it is added as an identity to the SSH agent.
 
 Now ssh into the server using `ssh server.mydomain.local`:
 
 ```
 sshuser@laptop:/$ ssh server.mydomain.local
-The authenticity of host 'server.mydomain.local (172.31.0.3)' can't be established.
-ED25519 key fingerprint is SHA256:PzhrcmX8/01Bnw8ulG/n05FTu92G32eJrZ8NrDyTAh4.
-This key is not known by any other names.
-Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
-Warning: Permanently added 'server.mydomain.local' (ED25519) to the list of known hosts.
 Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
 
 The programs included with the Debian GNU/Linux system are free software;
@@ -173,48 +202,6 @@ clean up:
 1. exit the server
 2. exit the client
 3. run `docker compose down`
-
-## 3-key-client-server-auth
-
-We'll build on key-client-auth to authenticate the server to the client.
-
-To authenticate the server to the client, we need to add the servers public key to the clients `known_hosts` file.
-
-We are doing it in the entryscript because the format of the `known_hosts` file makes it difficult to add the public key manually.
-
-We'll use `ssh-keyscan` which will output the format we need.
-
-1. ./init.sh
-2. docker compose up -d --build
-3. docker compose run client
-
-```
-# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
-# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
-# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
-# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
-# server.mydomain.local:22 SSH-2.0-OpenSSH_9.2p1 Debian-2
-Agent pid 9
-Identity added: /home/sshuser/.ssh/id_ed25519 (sshuser@laptop.mydomain.local)
-sshuser@laptop:/$
-```
-
-now ssh to the server:
-
-```
-sshuser@laptop:/$ ssh server.mydomain.local
-Linux server.mydomain.local 5.15.0-78-generic #85-Ubuntu SMP Fri Jul 7 15:25:09 UTC 2023 x86_64
-
-The programs included with the Debian GNU/Linux system are free software;
-the exact distribution terms for each program are described in the
-individual files in /usr/share/doc/*/copyright.
-
-Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
-permitted by applicable law.
-sshuser@server:~$
-```
-
-smoothest login yet with no password and no prompting the user whether they want to trust the server.
 
 ## 4-cert-host-auth
 

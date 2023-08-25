@@ -22,9 +22,6 @@ RUN useradd -m -d /home/sshuser -s /bin/bash sshuser
 # disable password auth
 RUN echo "PasswordAuthentication no" >> /etc/ssh/sshd_config
 
-# and we don't need the clients public key anymore
-# COPY --chown=sshuser:sshuser server/authorized_keys /home/sshuser/.ssh/authorized_keys
-
 # this is needed to run sshd
 RUN mkdir -p /var/run/sshd
 CMD ["/usr/sbin/sshd", "-D"]
