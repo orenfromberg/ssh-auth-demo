@@ -1,0 +1,6 @@
+FROM debian:stable
+
+RUN apt-get update 
+RUN apt-get install -y openssh-client
+
+WORKDIR /root
