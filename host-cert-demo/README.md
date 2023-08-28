@@ -1,23 +1,31 @@
 # host-cert-demo
 
-the client will use key auth but the server will use a host cert to authenticate to the client.
+In this demo, the client will use ssh key authentication but the server will use a host certificate to authenticate with the client.
 
-this will help in the situation where you have many servers to authenticate with a client.
+This will help in the situation where you have many servers to authenticate with a client.
 
 ## set up server
 
-start up the server with
+1. start up the server with
 ```
 docker compose build
 docker compose run server
 ```
 
-then start sshd with
+when the server starts up it will generate new host keys and then give you a command prompt:
+```
+ssh-keygen: generating new host keys: RSA ECDSA ED25519 
+root@server:/# /usr/sbin/sshd -D &
+[1] 9
+root@server:/# 
+```
+
+2. Start sshd in the background. Later we'll need to bring it to the foreground to restart:
 ```
 /usr/sbin/sshd -D &
 ```
 
-output a public key for the server that we want to sign:
+3. Inspect a server public key that we will want to sign with the certificate authority. I like to use ed25519 because it is strong and fast:
 ```
 root@server:~# cat /etc/ssh/ssh_host_ed25519_key.pub 
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP/g7eioBEXNMC4qIL2H0mMIc/YOVJThvs5GxsmBb6LI root@server.mydomain.local
@@ -26,12 +34,12 @@ root@server:/#
 
 ## set up CA
 
-in another terminal, start the certificate authority:
+1. in another terminal, start the certificate authority:
 ```
 docker compose run ca
 ```
 
-create the ca key pair with password `keypass`:
+2. create the ca key pair with password `keypass`:
 ```
 root@ca:~# ssh-keygen -t ed25519 -N 'keypass' -C 'ca@mydomain.local'
 Generating public/private ed25519 key pair.
@@ -56,7 +64,7 @@ The key's randomart image is:
 root@ca:~# 
 ```
 
-start the agent and add the key to the agent:
+3. start the agent and add the key to the agent:
 ```
 root@ca:~# eval $(ssh-agent) && ssh-add
 Agent pid 9
@@ -65,14 +73,14 @@ Identity added: /root/.ssh/id_ed25519 (ca@mydomain.local)
 root@ca:~#
 ```
 
-copy the server public key to the CA:
+4. copy the server public key to the CA:
 ```
 root@ca:/# cat <<EOF > ~/server.mydomain.local.pub
 > ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP/g7eioBEXNMC4qIL2H0mMIc/YOVJThvs5GxsmBb6LI root@server.mydomain.local
 > EOF
 ```
 
-create the host certificate for the server:
+5. create the host certificate for the server:
 
 ```
 root@ca:~# ssh-keygen -s ~/.ssh/id_ed25519 -h -I server.mydomain.local -n server.mydomain.local server.mydomain.local.pub
@@ -81,7 +89,7 @@ Signed host key server.mydomain.local-cert.pub: id "server.mydomain.local" seria
 root@ca:~#
 ```
 
-Inspect the cert and note the principal. this means that only this host can use this certificate.
+6. Inspect the cert and note the principal. this means that only this host can use this certificate.
 ```
 root@ca:~# ssh-keygen -L -f server.mydomain.local-cert.pub 
 server.mydomain.local-cert.pub:
@@ -100,7 +108,7 @@ ssh-ed25519-cert-v01@openssh.com AAAAIHNzaC1lZDI1NTE5LWNlcnQtdjAxQG9wZW5zc2guY29
 root@ca:~# 
 ```
 
-output the CA public key:
+7. output the CA public key:
 ```
 root@ca:~# cat ~/.ssh/id_ed25519.pub 
 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEgYF/bv19eyDurb+DpYaqK//A60cGquTwu7KrSZ10La ca@mydomain.local
@@ -109,17 +117,17 @@ root@ca:~#
 
 # set up client
 
-in another terminal, start the client:
+1. in another terminal, start the client:
 ```
 docker compose run client
 ```
 
-create an ssh keypair:
+2. create an ssh keypair:
 ```
 ssh-keygen -t ed25519 -N 'keypass' -C sshuser@laptop.mydomain.local
 ```
 
-copy the ca public key to the client and add the host cert to the known_hosts file:
+3. copy the ca public key to the client and add the host cert to the known_hosts file:
 ```
 cat <<EOF > ~/ca.pub
 > ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINk+f52wXWEY2X1s+uE6V+qjvemVSdhH/9WHT1sjgqYk ca@mydomain.local
@@ -129,7 +137,7 @@ cat <<EOF > ~/.ssh/known_hosts
 EOF
 ```
 
-inspect the `known_hosts` file:
+4. inspect the `known_hosts` file:
 ```
 sshuser@laptop:~/.ssh$ cat known_hosts 
 @cert-authority *.mydomain.local ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEgYF/bv19eyDurb+DpYaqK//A60cGquTwu7KrSZ10La ca@mydomain.local
@@ -168,13 +176,6 @@ and check to make sure that only the key(s) you wanted were added.
 sshuser@laptop:~$ 
 ```
 
-inspect that the key has been added on the server:
-```
-sshuser@server:~$ cat .ssh/authorized_keys 
-ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC5im1QVhOzjXQNLBKYic84f/cuUtSuUZGiNMDIkn3di sshuser@laptop.mydomain.local
-sshuser@server:~$
-```
-
 ssh to the server:
 ```
 sshuser@laptop:~$ ssh server.mydomain.local
@@ -189,6 +190,95 @@ permitted by applicable law.
 sshuser@server:~$ 
 ```
 
+inspect that the key has been added on the server:
+```
+sshuser@server:~$ cat .ssh/authorized_keys 
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIC5im1QVhOzjXQNLBKYic84f/cuUtSuUZGiNMDIkn3di sshuser@laptop.mydomain.local
+sshuser@server:~$
+```
+
 exit the server
 exit the client
 docker compose down
+
+# another server has appeared!
+
+We will now create a host certificate for a new server and ssh into it from our laptop. This time the server is a pihole.
+
+```
+docker compose run pihole
+```
+
+Have the CA sign the public key of the pihole and put the cert on the server.
+
+1. inspect the server public key of choice:
+```
+root@pihole:/# cat /etc/ssh/ssh_host_ed25519_key.pub 
+ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJxgu1uWDNvfd8djGYbqaV6ehEZEP3xzMJroy8Oefxez root@pihole.mydomain.local
+```
+2. have the CA sign the public key
+```
+root@ca:~# cat <<EOF > ~/pihole.mydomain.local.pub
+> ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJxgu1uWDNvfd8djGYbqaV6ehEZEP3xzMJroy8Oefxez root@pihole.mydomain.local
+> EOF
+root@ca:~# ssh-keygen -s ~/.ssh/id_ed25519 -h -I pihole.mydomain.local -n pihole.mydomain.local pihole.mydomain.local.pub
+Enter passphrase: 
+Signed host key pihole.mydomain.local-cert.pub: id "pihole.mydomain.local" serial 0 for pihole.mydomain.local valid forever
+root@ca:~# ls
+pihole.mydomain.local-cert.pub	pihole.mydomain.local.pub  server.mydomain.local-cert.pub  server.mydomain.local.pub
+root@ca:~# ssh-keygen -L -f pihole.mydomain.local-cert.pub 
+pihole.mydomain.local-cert.pub:
+        Type: ssh-ed25519-cert-v01@openssh.com host certificate
+        Public key: ED25519-CERT SHA256:3yHGaYQETMI8C8SLNqJhfv5npMi5dTdFpLetz8AU7Gc
+        Signing CA: ED25519 SHA256:duqcrb0wruN1lYOxgCxuVFe1QVX/fDs4R5nHHWPCWbk (using ssh-ed25519)
+        Key ID: "pihole.mydomain.local"
+        Serial: 0
+        Valid: forever
+        Principals: 
+                pihole.mydomain.local
+        Critical Options: (none)
+        Extensions: (none)
+root@ca:~# cat pihole.mydomain.local-cert.pub 
+ssh-ed25519-cert-v01@openssh.com AAAAIHNzaC1lZDI1NTE5LWNlcnQtdjAxQG9wZW5zc2guY29tAAAAIINeQi7RxvKgGE8sI6hXVUo1FH7WGS0NO2qv1pFot8WgAAAAIJxgu1uWDNvfd8djGYbqaV6ehEZEP3xzMJroy8OefxezAAAAAAAAAAAAAAACAAAAFXBpaG9sZS5teWRvbWFpbi5sb2NhbAAAABkAAAAVcGlob2xlLm15ZG9tYWluLmxvY2FsAAAAAAAAAAD//////////wAAAAAAAAAAAAAAAAAAADMAAAALc3NoLWVkMjU1MTkAAAAgdGl4PGsJwZm6bjlPNvz6WDsb4mJH3rDXITklclxDDjMAAABTAAAAC3NzaC1lZDI1NTE5AAAAQBBlh9tYfeRzV8CGGC1qijoNro8bbgaGEv8WEP/3mJnXSHry0n8A/OxbjeMRi04H0xgyPYcuhEGr2JM9ZNdjDA8= root@pihole.mydomain.local
+root@ca:~# 
+```
+3. copy the cert to the pihole and start sshd
+```
+root@pihole:/# cat <<EOF > /etc/ssh/ssh_host_ed25519_key-cert.pub
+> ssh-ed25519-cert-v01@openssh.com AAAAIHNzaC1lZDI1NTE5LWNlcnQtdjAxQG9wZW5zc2guY29tAAAAIINeQi7RxvKgGE8sI6hXVUo1FH7WGS0NO2qv1pFot8WgAAAAIJxgu1uWDNvfd8djGYbqaV6ehEZEP3xzMJroy8OefxezAAAAAAAAAAAAAAACAAAAFXBpaG9sZS5teWRvbWFpbi5sb2NhbAAAABkAAAAVcGlob2xlLm15ZG9tYWluLmxvY2FsAAAAAAAAAAD//////////wAAAAAAAAAAAAAAAAAAADMAAAALc3NoLWVkMjU1MTkAAAAgdGl4PGsJwZm6bjlPNvz6WDsb4mJH3rDXITklclxDDjMAAABTAAAAC3NzaC1lZDI1NTE5AAAAQBBlh9tYfeRzV8CGGC1qijoNro8bbgaGEv8WEP/3mJnXSHry0n8A/OxbjeMRi04H0xgyPYcuhEGr2JM9ZNdjDA8= root@pihole.mydomain.local
+> EOF
+root@pihole:/# echo "HostCertificate /etc/ssh/ssh_host_ed25519_key-cert.pub" >> /etc/ssh/sshd_config
+root@pihole:/# /usr/sbin/sshd -D &
+[1] 14
+```
+4. copy the clients public key to the server
+```
+sshuser@laptop:/$ ssh-copy-id pihole.mydomain.local
+/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "/home/sshuser/.ssh/id_ed25519.pub"
+/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed
+/usr/bin/ssh-copy-id: INFO: 1 key(s) remain to be installed -- if you are prompted now it is to install the new keys
+sshuser@pihole.mydomain.local's password: 
+
+Number of key(s) added: 1
+
+Now try logging into the machine, with:   "ssh 'pihole.mydomain.local'"
+and check to make sure that only the key(s) you wanted were added.
+
+sshuser@laptop:/$ 
+```
+5. ssh to the server
+```
+sshuser@laptop:/$ ssh pihole.mydomain.local
+Enter passphrase for key '/home/sshuser/.ssh/id_ed25519': 
+Linux pihole.mydomain.local 5.15.0-79-generic #86-Ubuntu SMP Mon Jul 10 16:07:21 UTC 2023 x86_64
+
+The programs included with the Debian GNU/Linux system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Debian GNU/Linux comes with ABSOLUTELY NO WARRANTY, to the extent
+permitted by applicable law.
+sshuser@pihole:~$ 
+```
+
+that was a lot of work. Next try using a user certificate and see if there is any improvement.

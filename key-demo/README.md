@@ -36,6 +36,8 @@ ssh to the server:
 ssh server.mydomain.local
 ```
 
+disable password authentication
+
 exit the server
 exit the client
 docker compose down

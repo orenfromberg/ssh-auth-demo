@@ -10,6 +10,16 @@ services:
       my-network:
         aliases:
           - server.mydomain.local
+  pihole:
+    container_name: pihole
+    hostname: pihole.mydomain.local
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    networks:
+      my-network:
+        aliases:
+          - pihole.mydomain.local
   client:
     container_name: ssh-client
     hostname: laptop.mydomain.local
